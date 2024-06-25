@@ -31,7 +31,7 @@
 <li>对Unicode编码的16进制字符串进行MD4单向哈希加密，得到最终的NTLM Hash值。</li>
 </ol>
 <p>在Windows Vista和Windows Server 2008之前的系统中，还会使用LM Hash，但从这两个版本开始，默认情况下只存储NTLM Hash，LM Hash将不再存在。通常情况下，NTLM Hash存储在Windows系统中的SAM文件或域控制器的NTDS.dit文件中。</p>
-<p>简单来说就是当用户注销、重启、锁屏后，操作系统就会让winlogon.exe<code>显示登录界面，也就是输入框。当</code>winlogon.exe<code>接收输入后，将密码交给</code>lsass.exe<code>进程，</code>lsass.exe进程中会存一份明文密码，登录时就需要将lsass.exe进程转换的明文密码hash与sam文件进行比对，这种方式即为本地认证。在渗透测试中，可以通过Mimikatz等工具读取lsass.exe进程，从而获得已登录用户的NTLM Hash或是明文密码。此外，在NTLM认证过程中，客户端会使用用户的NTLM Hash对服务器发送的Challenge进行加密，生成Response，以证明客户端用户已经知道账户密码</p>
+<p>简单来说就是当用户注销、重启、锁屏后，操作系统就会让winlogon.exe显示登录界面，也就是输入框。当winlogon.exe接收输入后，将密码交给lsass.exe进程，lsass.exe进程中会存一份明文密码，登录时就需要将lsass.exe进程转换的明文密码hash与sam文件进行比对，这种方式即为本地认证。在渗透测试中，可以通过Mimikatz等工具读取lsass.exe进程，从而获得已登录用户的NTLM Hash或是明文密码。此外，在NTLM认证过程中，客户端会使用用户的NTLM Hash对服务器发送的Challenge进行加密，生成Response，以证明客户端用户已经知道账户密码</p>
 <p><strong>Net-NTLM Hash</strong>:</p>
 <p>Net-NTLM Hash是网络环境下NTLM（New Technology LAN Manager）认证协议中使用的一种密码哈希，它在客户端和服务器之间的身份验证过程中扮演重要角色。NTLM认证是一种质询&#x2F;响应（Challenge&#x2F;Response）机制，Net-NTLM Hash的生成和使用流程如下:</p>
 <ol>
@@ -162,5 +162,13 @@
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://www.anquanke.com/post/id/193493</span><br><span class="line">https://xz.aliyun.com/t/8562?time__1311=n4%2BxnD0DcDuD907DCiD%2Fje0%3DeitePvh4x4%2BWPhD</span><br><span class="line">https://www.freebuf.com/articles/network/244375.html</span><br><span class="line">https://blog.csdn.net/weixin_54902210/article/details/128340465</span><br></pre></td></tr></table></figure>
 
 ]]></content>
+      <categories>
+        <category>渗透</category>
+      </categories>
+      <tags>
+        <tag>windows</tag>
+        <tag>内网渗透</tag>
+        <tag>域</tag>
+      </tags>
   </entry>
 </search>
